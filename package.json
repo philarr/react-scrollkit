@@ -2,7 +2,6 @@
   "name": "react-scrollkit",
   "version": "1.0.0",
   "description": "React components for scroll event",
-  "main": "modules",
   "repository": {
     "type": "git",
     "url": "https://github.com/philarr/react-scrollkit.git"

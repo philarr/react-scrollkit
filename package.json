@@ -1,0 +1,38 @@
+{
+  "name": "react-scrollkit",
+  "version": "1.0.0",
+  "description": "React components for scroll event",
+  "main": "modules",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/philarr/react-scrollkit.git"
+  },
+  "scripts": {
+    "examples": "webpack-dev-server --config examples/webpack.config.js --no-info --content-base examples",
+    "test": "./node_modules/karma/bin/karma start"
+  },
+  "homepage": "https://github.com/philarr/react-scrollkit",
+  "bugs": "https://github.com/philarr/react-scrollkit/issues",
+  "authors": [
+    "Philip Chung"
+  ],
+  "license": "MIT",
+  "tags": [
+    "react",
+    "scroll",
+    "lazy",
+    "reveal"
+  ],
+  "keywords": [
+    "react",
+    "react",
+    "scroll",
+    "lazy",
+    "reveal"
+  ],
+  "dependencies": {
+    "object-assign": "^4.0.1",
+    "react": "^15.0.1",
+    "react-dom": "^15.0.1"
+  }
+}

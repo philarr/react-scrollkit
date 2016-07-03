@@ -57,8 +57,8 @@ var Helpers = {
 
         var coords = element.getBoundingClientRect();
         var offsetY = y - this.props.offset;
-        var isInside = (offsetY >= (coords.top + y) && offsetY <=  (coords.top + y) + coords.height - 1);
-        var isOutside = (offsetY < (coords.top + y) || offsetY >  (coords.top + y) + coords.height - 1);
+        var isInside = (offsetY >= (coords.top + y - 1) && offsetY <=  (coords.top + y) + coords.height - 1);
+        var isOutside = (offsetY < (coords.top + y - 1) || offsetY >  (coords.top + y) + coords.height - 1);
         var activeLink = scroller.getActiveLink();
 
         if (isOutside && activeLink === to) {
@@ -91,15 +91,11 @@ var Helpers = {
 
       render: function() {
         var className = (this.state && this.state.active) ? ((this.props.className || "") + " " + (this.props.activeClass || "active")).trim() : this.props.className;
- 
-
-        return React.createElement(Component,  { className: className });
+        return React.createElement(Component,  { className: className, children: this.props.children, onClick: this.handleClick });
       }
     });
   },
 
-
- 
 
   Reveal: function (Component, customScroller) {
     var scroller = customScroller || defaultScroller;
@@ -168,15 +164,12 @@ var Helpers = {
      	    defaultScroller.unregister(this.props.name);
       },
       render: function() {
- 
         var className = (this.state && this.state.active) ? ((this.props.className || "") + " " + (this.props.activeClass || "active")).trim() : this.props.className;
- 
-
         /* Lazy load => empty div if not in view, render child when it is */
         if (this.props.lazy && !this.state.active) {
           return React.createElement('div');
         }
-        return React.createElement(Component, { className: className });
+        return React.createElement(Component,  { className: className, children: this.props.children });
 
       }
     });
@@ -198,7 +191,8 @@ var Helpers = {
         defaultScroller.unregister(this.props.name);
       },
       render: function() {
-        return React.createElement(Component, this.props);
+       
+        return React.createElement(Component, { className: this.props.className, children: this.props.children });
       }
     });
   }

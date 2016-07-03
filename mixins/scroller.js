@@ -40,7 +40,7 @@ module.exports = {
       var target = this.get(to);
 
       if(!target) {
-        throw new Error("target Element not found");
+        throw new Error("target " + to + " not found");
       }
 
       props = props || {};

@@ -7,23 +7,33 @@ var animateScroll = require('./animate-scroll');
 var scrollSpy = require('./scroll-spy');
 var defaultScroller = require('./scroller');
 
+
+
+function inViewport(el, o) {
+  var rect = el.getBoundingClientRect();
+  if ((rect.top + o) <= (window.innerHeight || document.documentElement.clientHeight)) return true;
+  return false;
+}
+
+
 var Helpers = {
 
   Scroll: function (Component, customScroller) {
 
   	var scroller = customScroller || defaultScroller;
-
     return React.createClass({
       propTypes: {
         to: React.PropTypes.string.isRequired,
         offset: React.PropTypes.number,
         delay: React.PropTypes.number,
         onClick: React.PropTypes.func,
-        duration: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.func])
+        duration: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.func]),
       },
-
+      getInitialState: function() {
+      return { active: false };
+      },
       getDefaultProps: function() {
-        return {offset: 0};
+        return { offset: 0 };
       },
 
       scrollTo : function(to, props) {
@@ -31,17 +41,13 @@ var Helpers = {
       },
 
       handleClick: function(event) {
-
         /* give the posibility to override onClick */
         if(this.props.onClick) this.props.onClick(event);
-
         /* dont bubble the navigation */
         if (event.stopPropagation) event.stopPropagation();
         if (event.preventDefault) event.preventDefault();
-
         /* do the magic! */
         this.scrollTo(this.props.to, this.props);
-
       },
 
       stateHandler: function() {
@@ -54,9 +60,9 @@ var Helpers = {
       	var to = this.props.to;
         var element = scroller.get(to);
 	    	if (!element) return;
-
         var coords = element.getBoundingClientRect();
         var offsetY = y - this.props.offset;
+        /* Currently isInside is true when top edge reached top of viewport && bottom edge has not left viewport */
         var isInside = (offsetY >= (coords.top + y - 1) && offsetY <=  (coords.top + y) + coords.height - 1);
         var isOutside = (offsetY < (coords.top + y - 1) || offsetY >  (coords.top + y) + coords.height - 1);
         var activeLink = scroller.getActiveLink();
@@ -64,14 +70,9 @@ var Helpers = {
         if (isOutside && activeLink === to) {
           scroller.setActiveLink(void 0);
           this.setState({ active : false });
-
         } else if (isInside && activeLink != to) {
           scroller.setActiveLink(to);
           this.setState({ active : true });
-
-          if(this.props.onSetActive) {
-            this.props.onSetActive(to);
-          }
           scrollSpy.updateStates();
         }
       },
@@ -96,7 +97,6 @@ var Helpers = {
     });
   },
 
-
   Reveal: function (Component, customScroller) {
     var scroller = customScroller || defaultScroller;
 
@@ -108,7 +108,6 @@ var Helpers = {
         once: React.PropTypes.bool,
         lazy: React.PropTypes.bool,
       },
-    
       getDefaultProps: function() {
         return { 
           offset: 0,
@@ -117,24 +116,15 @@ var Helpers = {
           delay: 0
          };
       },
-
       getInitialState: function() {
     	return { active: false };
  	    },
- 
-      inViewport: function(el, o) {
-        var rect = el.getBoundingClientRect();
-        if ((rect.top + o) <= (window.innerHeight || document.documentElement.clientHeight)) return true;
-        return false;
-      },
-
       spyHandler: function(y) {
         //use scroll-spy but instead of 'to', target itself
         var domNode = ReactDOM.findDOMNode(this);
         var offset = this.props.offset;
-
         /* if element is in viewport, set class 'active' or specified from 'activeClass' */
-        if (this.inViewport(domNode, offset) && !this.state.active) {
+        if (inViewport(domNode, offset) && !this.state.active) {
             this.setState({ active : true });
             /* remove from stack if animated once or is lazy loaded */
             if (this.props.once || this.props.lazy) {
@@ -146,9 +136,8 @@ var Helpers = {
             }
         }
         /* Element moved out of viewport, remove activeClass and set state to false */
-        else if (!this.inViewport(domNode, offset) && this.state.active) {
+        else if (!inViewport(domNode, offset) && this.state.active) {
             this.setState({ active : false });
- 
         }
       },
       componentDidMount: function() {
@@ -157,22 +146,102 @@ var Helpers = {
           scrollSpy.mount(null, this.spyHandler);
           //run handler once on mount to calculate state
           this.spyHandler();
-     
       },
       componentWillUnmount: function() {
      	    scrollSpy.unmount(null, this.spyHandler);
      	    defaultScroller.unregister(this.props.name);
       },
+ 
+
       render: function() {
         var className = (this.state && this.state.active) ? ((this.props.className || "") + " " + (this.props.activeClass || "active")).trim() : this.props.className;
-        /* Lazy load => empty div if not in view, render child when it is */
+        var  children = this.props.children;
         if (this.props.lazy && !this.state.active) {
-          return React.createElement('div');
+          children = React.createElement('div');
         }
-        return React.createElement(Component,  { className: className, children: this.props.children });
+        return React.createElement(Component,  { className: className }, children);
 
       }
     });
+  },
+
+
+  /*
+  * Reveal for images that wants to be lazy and preloaded,
+  * also hoists React SSR by forcing file-loader to only resolve
+  * image URLS on client. Behaviour may have its benefit
+  * (no need to implement isomorphic tools) but images will not show
+  * if SSR for images is intended.
+  */
+
+  LazyImage: function() {
+    return React.createClass({
+      propTypes: {
+        src: React.PropTypes.string.isRequired,
+        offset: React.PropTypes.number,
+        wrapper: React.PropTypes.string,
+        wrapperClass: React.PropTypes.object,
+      },
+      getDefaultProps: function() {
+        return { 
+          offset: 0,
+         };
+      },
+      getInitialState: function() {
+        return { 
+          loaded: false,
+          active: false,
+          error: false
+         }
+      },
+      onload: function() {
+        this.setState({loaded: true});
+      },
+      onerror: function() {
+        console.log(this.props.src + ' not found!');
+      },
+      spyHandler: function(y) {
+        var domNode = ReactDOM.findDOMNode(this);
+        var offset = this.props.offset;
+        if (inViewport(domNode, offset) && !this.state.active) {
+            this.setState({ active : true });
+            scrollSpy.unmount(null, this.spyHandler);
+        }
+      },
+      componentDidMount: function() {
+          var domNode = ReactDOM.findDOMNode(this);
+          scrollSpy.mount(null, this.spyHandler);
+          this.spyHandler();
+      },
+      componentWillUnmount: function() {
+          scrollSpy.unmount(null, this.spyHandler);
+      },
+      render: function() {
+        var component;
+        var className = (this.state.active && this.state.loaded) ? ((this.props.className || "") + " " + (this.props.activeClass || "active")).trim() : this.props.className;
+
+        if (this.state.active) {
+          component = React.createElement('img', { 
+                  onLoad: this.onload,
+                  onError: this.onerror,
+                  className: className,
+                  src: this.props.src,
+                  style: {
+                    visibility: this.state.loaded ? 'visible' : 'hidden'
+                  }
+                });
+        }
+        else {
+          component = React.createElement('div');
+        }
+
+        if (this.props.wrapper) {
+           return React.createElement(wrapper, { className: this.props.wrapperClass }, component);
+        }
+
+        return component;
+      }
+    })
   },
 
 

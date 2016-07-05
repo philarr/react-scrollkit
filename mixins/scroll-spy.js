@@ -18,15 +18,16 @@ var scrollSpy = {
 
   scrollHandler: function () {
     clearTimeout(this.wait);
+
     //debounce, possibility add throttle option in the future.
     this.wait = setTimeout(function() {
-      //calls registered spy callbacks
-      for(var i = 0; i < this.spyCallbacks.length; i++) {
-        this.spyCallbacks[i](this.currentPositionY());
-      }
-      //calls registered scroll event callbacks
  
-    }.bind(this), 10);
+      /* copy array to prevent mid-loop mutations and invoke callbacks */
+      this.spyCallbacks.slice(0).forEach(function(cb) {
+        cb(this.currentPositionY());
+      }, this);
+
+    }.bind(this), 150);
  
 
   },

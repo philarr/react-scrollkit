@@ -9,3 +9,4 @@ exports.directScroller = require('./mixins/direct-scroller.js');
 exports.Events = require('./mixins/scroll-events.js');
 exports.scrollSpy = require('./mixins/scroll-spy.js');
 exports.animateScroll = require('./mixins/animate-scroll.js');
+exports.LazyImage = require('./mixins/Helpers.js').LazyImage();

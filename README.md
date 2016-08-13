@@ -18,12 +18,37 @@ Properties
 
 - `activeClass` Custom class to be applied to element on entering viewport. Default is 'active' (string, optional)
 
-###Usage
-
-Img will be loaded only when entering viewport
+Usage
 
 ```html
 <Reveal name="component1" delay=500 offset=-100 lazy=true>
-  <img src="lazy.png" />
+  <div></div>
 </Reveal>
 ```
+
+
+###LazyImage
+Properties
+
+- `src` Path to image (required)
+
+- `offset` Y-coord offset from element's top (int, optional)
+
+-  `wrapper` Component to wrap the image in
+
+- `wrapperClass` Wrapper component's class
+
+- `activeClass` Custom class to be applied to the image element on loaded event. Default is 'active' (string, optional)
+
+Usage
+
+```html
+<LazyImage src="/path/to/image/lazy.png" className="browser-mockup shadow-2 animated-before" activeClass="fadeInto" />
+```
+
+
+
+
+
+
+

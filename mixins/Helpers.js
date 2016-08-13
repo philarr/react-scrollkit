@@ -92,7 +92,14 @@ var Helpers = {
 
       render: function() {
         var className = (this.state && this.state.active) ? ((this.props.className || "") + " " + (this.props.activeClass || "active")).trim() : this.props.className;
-        return React.createElement(Component,  { className: className, children: this.props.children, onClick: this.handleClick });
+        return React.createElement(Component,  
+          { 
+            className: className, 
+            children: this.props.children, 
+            onClick: this.handleClick,
+            id: this.props.id,
+            style: this.props.style 
+          });
       }
     });
   },
@@ -159,7 +166,11 @@ var Helpers = {
         if (this.props.lazy && !this.state.active) {
           children = React.createElement('div');
         }
-        return React.createElement(Component,  { className: className }, children);
+        return React.createElement(Component,  { 
+          className: className,
+          id: this.props.id,
+          style: this.props.style 
+        }, children);
 
       }
     });
@@ -195,7 +206,15 @@ var Helpers = {
          }
       },
       onload: function() {
-        this.setState({loaded: true});
+         
+       var a = setTimeout(function() {
+          /* 
+           * atm, the timeout length is arbritary but is needed to ensure
+           * css animations is fired correctly in the event the image is cached
+           * and active+loaded is applied at the same render interval.
+           */
+          this.setState({loaded: true});
+        }.bind(this), 50);
       },
       onerror: function() {
         console.log(this.props.src + ' not found!');
@@ -221,6 +240,7 @@ var Helpers = {
         var className = (this.state.active && this.state.loaded) ? ((this.props.className || "") + " " + (this.props.activeClass || "active")).trim() : this.props.className;
 
         if (this.state.active) {
+
           component = React.createElement('img', { 
                   onLoad: this.onload,
                   onError: this.onerror,
@@ -228,11 +248,12 @@ var Helpers = {
                   src: this.props.src,
                   style: {
                     visibility: this.state.loaded ? 'visible' : 'hidden'
-                  }
+                  },
+                  id: this.props.id,
                 });
         }
         else {
-          component = React.createElement('div');
+          component = React.createElement('span');
         }
 
         if (this.props.wrapper) {
@@ -244,6 +265,12 @@ var Helpers = {
     })
   },
 
+
+
+ /* 
+  Dedicated Spy components to react to another element's position
+ */
+ 
 
 
   Element: function(Component) {
@@ -261,7 +288,12 @@ var Helpers = {
       },
       render: function() {
        
-        return React.createElement(Component, { className: this.props.className, children: this.props.children });
+        return React.createElement(Component, { 
+          className: this.props.className, 
+          children: this.props.children ,
+          id: this.props.id,
+          style: this.props.style 
+        });
       }
     });
   }

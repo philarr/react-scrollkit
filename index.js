@@ -1,7 +1,6 @@
 exports.ScrollLink = require('./components/ScrollLink.js');
 exports.DirectLink = require('./components/DirectLink.js');
 exports.Button = require('./components/Button.js');
-exports.Spy = require('./components/Spy.js');
 exports.Element = require('./components/Element.js');
 exports.Reveal = require('./components/Reveal.js');
 exports.Helpers = require('./mixins/Helpers.js');

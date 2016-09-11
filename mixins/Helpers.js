@@ -109,6 +109,7 @@ var Helpers = {
 
     return React.createClass({
       propTypes: {
+        wrapper: React.PropTypes.string,
         name: React.PropTypes.string.isRequired,
         offset: React.PropTypes.number,
         delay: React.PropTypes.number,
@@ -117,6 +118,7 @@ var Helpers = {
       },
       getDefaultProps: function() {
         return { 
+          wrapper: 'div',
           offset: 0,
           once: true,
           lazy: false,
@@ -132,6 +134,7 @@ var Helpers = {
         var offset = this.props.offset;
         /* if element is in viewport, set class 'active' or specified from 'activeClass' */
         if (inViewport(domNode, offset) && !this.state.active) {
+ 
             this.setState({ active : true });
             /* remove from stack if animated once or is lazy loaded */
             if (this.props.once || this.props.lazy) {
@@ -166,7 +169,7 @@ var Helpers = {
         if (this.props.lazy && !this.state.active) {
           children = React.createElement('div');
         }
-        return React.createElement(Component,  { 
+        return React.createElement(this.props.wrapper,  { 
           className: className,
           id: this.props.id,
           style: this.props.style 

@@ -2,7 +2,7 @@ var scrollSpy = {
 
   spyCallbacks: [],
   spySetState: [],
-  wait: null,
+  wait: false,
 
   mount: function (stateHandler, spyHandler) {
    if (stateHandler) this.addHandler('spySetState', stateHandler);
@@ -17,19 +17,20 @@ var scrollSpy = {
   },
 
   scrollHandler: function () {
-    clearTimeout(this.wait);
+    //throttle scroll event
 
-    //debounce, possibility add throttle option in the future.
-    this.wait = setTimeout(function() {
- 
-      /* copy array to prevent mid-loop mutations and invoke callbacks */
+    if (!this.wait) {
+      this.wait = true;
+      // copy array to prevent mid-loop mutation
       this.spyCallbacks.slice(0).forEach(function(cb) {
         cb(this.currentPositionY());
       }, this);
-
-    }.bind(this), 150);
  
-
+ 
+      setTimeout(function() {
+        this.wait = false;
+      }.bind(this), 100);
+    }
   },
 
   hasHandlers: function() {

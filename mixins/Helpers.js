@@ -249,6 +249,8 @@ var Helpers = {
                   onError: this.onerror,
                   className: className,
                   src: this.props.src,
+                  alt: this.props.alt,
+                  title: this.props.title,
                   style: {
                     visibility: this.state.loaded ? 'visible' : 'hidden'
                   },

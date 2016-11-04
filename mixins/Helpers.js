@@ -11,8 +11,7 @@ var defaultScroller = require('./scroller');
 
 function inViewport(el, o) {
   var rect = el.getBoundingClientRect();
-  if ((rect.top + o) <= (window.innerHeight || document.documentElement.clientHeight)) return true;
-  return false;
+  return ((rect.top + o) <= (window.innerHeight || document.documentElement.clientHeight));
 }
 
 
@@ -20,7 +19,7 @@ var Helpers = {
 
   Scroll: function (Component, customScroller) {
 
-    var scroller = customScroller || defaultScroller;
+  	var scroller = customScroller || defaultScroller;
     return React.createClass({
       propTypes: {
         to: React.PropTypes.string.isRequired,
@@ -37,7 +36,7 @@ var Helpers = {
       },
 
       scrollTo : function(to, props) {
-        scroller.scrollTo(to, props);
+      	scroller.scrollTo(to, props);
       },
 
       handleClick: function(event) {
@@ -57,9 +56,9 @@ var Helpers = {
       },
 
       spyHandler: function(y) {
-        var to = this.props.to;
+      	var to = this.props.to;
         var element = scroller.get(to);
-        if (!element) return;
+	    	if (!element) return;
         var coords = element.getBoundingClientRect();
         var offsetY = y - this.props.offset;
         /* Currently isInside is true when top edge reached top of viewport && bottom edge has not left viewport */
@@ -126,8 +125,8 @@ var Helpers = {
          };
       },
       getInitialState: function() {
-      return { active: false };
-      },
+    	return { active: false };
+ 	    },
       spyHandler: function(y) {
         //use scroll-spy but instead of 'to', target itself
         var domNode = ReactDOM.findDOMNode(this);
@@ -151,15 +150,15 @@ var Helpers = {
         }
       },
       componentDidMount: function() {
-          var domNode = ReactDOM.findDOMNode(this);
-          defaultScroller.register(this.props.name, domNode);
+	        var domNode = ReactDOM.findDOMNode(this);
+	        defaultScroller.register(this.props.name, domNode);
           scrollSpy.mount(null, this.spyHandler);
           //run handler once on mount to calculate state
           this.spyHandler();
       },
       componentWillUnmount: function() {
-          scrollSpy.unmount(null, this.spyHandler);
-          defaultScroller.unregister(this.props.name);
+     	    scrollSpy.unmount(null, this.spyHandler);
+     	    defaultScroller.unregister(this.props.name);
       },
  
 
@@ -221,13 +220,13 @@ var Helpers = {
       onerror: function() {
         console.log(this.props.src + ' not found!');
       },
-      spyHandler: function(y) {
+      spyHandler: function() {
 
         var domNode = ReactDOM.findDOMNode(this);
-        var offset = this.props.offset;
+ 
 
-        if (inViewport(domNode, offset) && !this.state.active) {
-
+        if (inViewport(domNode, this.props.offset) && !this.state.active) {
+ 
             this.setState({ active : true });
             scrollSpy.unmount(null, this.spyHandler);
 
@@ -239,7 +238,7 @@ var Helpers = {
         }
       },
       componentDidMount: function() {
-          var domNode = ReactDOM.findDOMNode(this);
+ 
           scrollSpy.mount(null, this.spyHandler);
           this.spyHandler();
       },

@@ -3,6 +3,7 @@ var scrollSpy = {
   spyCallbacks: [],
   spySetState: [],
   wait: false,
+  debounce: null,
 
   mount: function (stateHandler, spyHandler) {
    if (stateHandler) this.addHandler('spySetState', stateHandler);
@@ -16,21 +17,28 @@ var scrollSpy = {
             document.documentElement.scrollTop : document.body.scrollTop;
   },
 
-  scrollHandler: function () {
-    //throttle scroll event
 
+  handlerCb: function(cb) {
+        cb(this.currentPositionY());
+  },
+
+  scrollHandler: function () {
+    // throttle scroll event
     if (!this.wait) {
       this.wait = true;
       // copy array to prevent mid-loop mutation
-      this.spyCallbacks.slice(0).forEach(function(cb) {
-        cb(this.currentPositionY());
-      }, this);
- 
- 
+      this.spyCallbacks.slice(0).forEach(this.handlerCb, this);
       setTimeout(function() {
         this.wait = false;
       }.bind(this), 100);
     }
+
+    // fire off one last check when scroll ends
+    clearTimeout(this.debounce);
+    this.debounce = setTimeout(function() {
+      this.spyCallbacks.slice(0).forEach(this.handlerCb, this);
+      this.debounce = null;
+    }.bind(this), 1000);
   },
 
   hasHandlers: function() {
@@ -42,7 +50,7 @@ var scrollSpy = {
       if (document && !this.hasHandlers()) {
         this._scrollHandler = this.scrollHandler.bind(this)
         window.addEventListener('resize', this._scrollHandler);
-        document.addEventListener('scroll', this._scrollHandler);
+        document.addEventListener('scroll', this._scrollHandler, { passive: true });
       }
       this[queueKey].push(handler);
     }
